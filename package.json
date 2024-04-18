@@ -4,15 +4,29 @@
   "description": "Rocket launcher",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon ./src/app.js",
+    "test": "cross-env NODE_ENV=test jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.6.8",
+    "cross-env": "^7.0.3",
     "ejs": "^3.1.9",
     "express": "^4.19.2",
-    "node-fetch": "^3.3.2",
+    "node-fetch": "^2.6.1",
     "nodemon": "^3.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+   "automock": false,
+   "setupFiles": [
+     "./jest.setup.js"
+   ],
+   "testEnvironment": "node"
   }
 }
