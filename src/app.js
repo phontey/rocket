@@ -28,13 +28,46 @@ async function fetchCrewDetails(crewIds) {
     return crewDetails;
 }
 
+async function fetchLaunches() {
+   const response = await fetch('https://api.spacexdata.com/v4/launches');
+   if (!response.ok) {
+       throw new Error(`Error fetching launches: ${response.statusText}`);
+   }
+   const launches = await response.json(); // Parse the JSON from the response
+   return launches;
+}
+
+// Fetch launch details by ID
+app.get('/launches/:id', async (req, res) => {
+   const { id } = req.params; // Extract the ID from the request URL
+   try {
+       const response = await fetch(`https://api.spacexdata.com/v4/launches/${id}`);
+       if (!response.ok) {
+           throw new Error(`Error fetching launch: ${response.statusText}`);
+       }
+       const launchDetails = await response.json(); // Parse the JSON from the response
+
+       // Optionally, augment the launch details with crew details if any crew members are associated with the launch
+       if (launchDetails.crew && launchDetails.crew.length > 0) {
+           launchDetails.crewDetails = await fetchCrewDetails(launchDetails.crew);
+       } else {
+           launchDetails.crewDetails = [];
+       }
+
+       res.json(launchDetails); // Respond with the launch details
+   } catch (error) {
+       console.error(`Error fetching launch with ID ${id}:`, error);
+       res.status(500).send('Error fetching launch data');
+   }
+});
+
 app.get('/', async (req, res) => {
    try {
        const response = await fetch('https://api.spacexdata.com/v4/launches');
        if (!response.ok) {
            throw new Error(`Error fetching launches: ${response.statusText}`);
        }
-       const launches = await response.json(); // Parse the JSON from the response
+       const launches = await fetchLaunches(); 
 
        // Augment launches with crew details
        for (const launch of launches) {
@@ -51,9 +84,13 @@ app.get('/', async (req, res) => {
    }
 });
 
+// Start the server only if we are not testing
+if (process.env.NODE_ENV !== 'test') {
+   app.listen(PORT, () => {
+       console.log(`Server running on port ${PORT}`);
+   });
+}
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-module.exports = { app, fetchCrewDetails};
+module.exports = { app, fetchCrewDetails, fetchLaunches};
 

@@ -15,3 +15,4 @@ describe('GET /', () => {
       expect(response.text).toContain('Falcon 9');
    });
 });
+
